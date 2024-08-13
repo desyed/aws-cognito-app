@@ -72,29 +72,30 @@ export async function handleConfirmSignUp(
 }
 
 export async function handleSignIn(
-  prevState: string | undefined,
-  formData: FormData
+  formData:  any
 ) {
   let redirectLink = "/dashboard";
   try {
     const { isSignedIn, nextStep } = await signIn({
-      username: String(formData.get("email")),
-      password: String(formData.get("password")),
+      username: formData.email,
+      password: formData.password,
     });
     if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
       await resendSignUpCode({
-        username: String(formData.get("email")),
+        username: formData.email,
       });
       redirectLink = "/auth/confirm-signup";
+
     }
+
   } catch (error) {
-    return getErrorMessage(error);
+    return {error};
   }
 
-  redirect(redirectLink);
+  return {redirectLink: redirectLink};
 }
 
-export async function handleSignOut() {
+export const handleSignOut = async () => {
   try {
     await signOut();
   } catch (error) {
