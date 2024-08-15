@@ -1,12 +1,16 @@
 import { redirect } from "next/navigation";
+
 import {
   signUp,
   confirmSignUp,
   signIn,
   signOut,
   resendSignUpCode,
-  autoSignIn
+  autoSignIn,
+  fetchUserAttributes
 } from "aws-amplify/auth";
+
+
 import {getErrorMessage} from "@/lib/get-error-message";
 
 export async function handleSignUp(
@@ -76,17 +80,21 @@ export async function handleSignIn(
 ) {
   let redirectLink = "/dashboard";
   try {
+
     const { isSignedIn, nextStep } = await signIn({
       username: formData.email,
       password: formData.password,
     });
+
     if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
       await resendSignUpCode({
         username: formData.email,
       });
       redirectLink = "/auth/confirm-signup";
-
     }
+
+    // fetch attributes
+    handleFetchUserAttributes()
 
   } catch (error) {
     return {error};
@@ -95,11 +103,21 @@ export async function handleSignIn(
   return {redirectLink: redirectLink};
 }
 
+// todo: Implement logout functionality
 export const handleSignOut = async () => {
   try {
-    await signOut();
+    await signOut({ global: true});
   } catch (error) {
     console.log(getErrorMessage(error));
   }
   redirect("/auth/login");
+}
+
+export async function handleFetchUserAttributes() {
+  try {
+    const userAttributes = await fetchUserAttributes();
+    console.log(userAttributes);
+  } catch(error) {
+    console.log(error);
+  }
 }
