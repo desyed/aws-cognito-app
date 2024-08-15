@@ -1,4 +1,7 @@
+"use client";
+
 import { redirect } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 import {
   signUp,
@@ -103,14 +106,15 @@ export async function handleSignIn(
   return {redirectLink: redirectLink};
 }
 
-// todo: Implement logout functionality
-export const handleSignOut = async () => {
+export const handleSignOut = async (
+  router: ReturnType<typeof useRouter> 
+) => {
   try {
     await signOut({ global: true});
   } catch (error) {
     console.log(getErrorMessage(error));
-  }
-  redirect("/auth/login");
+  } finally {}
+  router.push("/auth/login");
 }
 
 export async function handleFetchUserAttributes() {
